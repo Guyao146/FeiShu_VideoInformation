@@ -28,4 +28,4 @@ jobs:
           XHS_CLIENT_SECRET: ${{ secrets.XHS_CLIENT_SECRET }}
           APP_TOKEN: ${{ secrets.APP_TOKEN }}
           TABLE_ID: ${{ secrets.TABLE_ID }}
-        run: node ./FeiShu_VideoInformation/index.js
+        run: node ./index.js
