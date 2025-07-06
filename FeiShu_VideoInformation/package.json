@@ -2,7 +2,7 @@
   "name": "feishu-video-sync",
   "version": "1.0.0",
   "scripts": {
-    "start": "node ./FeiShu_VideoInformation/index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "@larksuiteoapi/node-sdk": "^1.0.0",
