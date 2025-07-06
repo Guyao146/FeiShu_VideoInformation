@@ -1,0 +1,31 @@
+name: Data Sync
+
+on:
+  schedule:
+    - cron: '0 17 * * *' # 每天UTC时间17:00（北京时间次日1:00）
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Sync
+        env:
+          DOUYIN_CLIENT_KEY: ${{ secrets.DOUYIN_CLIENT_KEY }}
+          DOUYIN_CLIENT_SECRET: ${{ secrets.DOUYIN_CLIENT_SECRET }}
+          XHS_CLIENT_ID: ${{ secrets.XHS_CLIENT_ID }}
+          XHS_CLIENT_SECRET: ${{ secrets.XHS_CLIENT_SECRET }}
+          APP_TOKEN: ${{ secrets.APP_TOKEN }}
+          TABLE_ID: ${{ secrets.TABLE_ID }}
+        run: node ./FeiShu_VideoInformation/index.js
