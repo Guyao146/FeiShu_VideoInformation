@@ -1,0 +1,13 @@
+{
+  "name": "feishu-video-sync",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ./FeiShu_VideoInformation/index.js"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.0.0",
+    "axios": "^1.3.4",
+    "moment": "^2.29.4",
+    "node-schedule": "^2.1.0"
+  }
+}
