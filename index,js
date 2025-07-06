@@ -1,0 +1,91 @@
+require('dotenv').config();
+const { LarkClient } = require('@larksuiteoapi/node-sdk');
+const axios = require('axios');
+
+const appId = process.env.APP_ID;
+const appSecret = process.env.APP_SECRET;
+const tableToken = process.env.TABLE_TOKEN;
+
+const larkClient = new LarkClient({
+  appId,
+  appSecret,
+});
+
+async function getAccessToken() {
+  const res = await larkClient.auth.v3.app_access_token.internal.create({
+    params: {},
+    data: {
+      app_id: appId,
+      app_secret: appSecret,
+    },
+  });
+  return res.data.app_access_token;
+}
+
+async function fetchDataFromPlatform(platform, accessToken) {
+  // 这里需要替换为实际的API调用逻辑
+  switch (platform) {
+    case 'xiaohongshu':
+      return await axios.get(`https://api.xiaohongshu.com/data?token=${accessToken}`);
+    case 'kuaishou':
+      return await axios.get(`https://api.kuaishou.com/data?token=${accessToken}`);
+    case 'weixin':
+      return await axios.get(`https://api.weixin.qq.com/data?access_token=${accessToken}`);
+    case 'douyin':
+      return await axios.get(`https://open.douyin.com/data?access_token=${accessToken}`);
+    case 'xigua':
+      return await axios.get(`https://open.xgvideo.com/data?access_token=${accessToken}`);
+    default:
+      throw new Error('Unsupported platform');
+  }
+}
+
+async function updateFeishuDoc(data) {
+  const accessToken = await getAccessToken();
+
+  for (const platform in data) {
+    try {
+      const response = await fetchDataFromPlatform(platform, accessToken);
+      const rows = [
+        {
+          fields: {
+            平台: { text: [{ content: platform }] },
+            视频播放量: { number: response.data.video_play_count },
+            粉丝数: { number: response.data.follower_count },
+            更新日期: { date: { start_time: new Date().toISOString().split('T')[0] } },
+          },
+        },
+      ];
+
+      await larkClient.drive.v2.sheets.rows.append({
+        path: {
+          spreadsheet_token: tableToken,
+          sheet_name_or_id: 'Sheet1',
+        },
+        params: {
+          access_token,
+        },
+        data: {
+          rows,
+        },
+      });
+
+      console.log(`Successfully updated ${platform} data`);
+    } catch (error) {
+      console.error(`Failed to fetch or update data for ${platform}:`, error.message);
+    }
+  }
+}
+
+const platformsData = {
+  xiaohongshu: {}, // 小红书的数据结构
+  kuaishou: {},   // 快手的数据结构
+  weixin: {},     // 公众号的数据结构
+  douyin: {},     // 抖音的数据结构
+  xigua: {},      // 西瓜视频的数据结构
+};
+
+updateFeishuDoc(platformsData).catch(console.error);
+
+
+
